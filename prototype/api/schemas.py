@@ -23,7 +23,6 @@ class MerchantIn(BaseModel):
 
 
 class RelationIn(BaseModel):
-    merchant_id: int
     customer_enterprise_id: int
     relation_type: str = "dealt"
 
