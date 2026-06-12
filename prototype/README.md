@@ -17,12 +17,20 @@ prototype/
 │   ├── credit.py          # 信用评分与账期推荐（docs/05）
 │   ├── pricelock.py       # 智能锁价引擎（docs/05）
 │   ├── recovery.py        # 弃单挽回引擎（docs/05）
-│   └── triggers.py        # 触发器引擎：补货/价格异动（docs/04）
+│   ├── triggers.py        # 触发器引擎：补货/价格异动（docs/04）
+│   └── persistence.py     # SQLite 持久化（基于 sql/schema.sql，docs/01）
 ├── api/                   # FastAPI REST 接口层
-│   ├── app.py             # 应用与路由（含 /docs Swagger）
+│   ├── app.py             # 应用与路由（鉴权/多租户/持久化/静态前端）
+│   ├── auth.py            # Bearer 令牌鉴权 + 多租户上下文
 │   └── schemas.py         # Pydantic 请求/响应模型
-├── tests/                 # unittest 单元测试（41 个）
-├── requirements.txt       # API 层依赖（核心引擎零依赖）
+├── frontend/              # Vue 3 (CDN) 可交互前端，由 /ui 提供
+│   ├── index.html         # 载入演示数据 + 身份切换
+│   ├── dashboard.html     # 客户主权看板
+│   ├── matching.html      # 智能撮合
+│   ├── pricelock.html     # 智能锁价
+│   ├── app.js / styles.css
+├── tests/                 # unittest 单元测试（50 个）
+├── requirements.txt       # API/前端依赖（核心引擎零依赖）
 └── demo.py                # 端到端演示脚本
 ```
 
@@ -32,20 +40,33 @@ prototype/
 # 端到端演示（5 个场景，含防撬客断言）
 python3 prototype/demo.py
 
-# 单元测试（41 个，纯标准库 + API 层）
+# 单元测试（50 个，纯标准库 + API + 持久化）
 cd prototype && python3 -m unittest discover -s tests -p "test_*.py"
 
-# 启动 REST API（需先 pip install -r requirements.txt）
+# 启动 REST API + 前端（需先 pip install -r requirements.txt）
 cd prototype && uvicorn api.app:app --reload
-# 浏览器打开 http://127.0.0.1:8000/docs 查看交互式 API 文档
+#   API 文档:  http://127.0.0.1:8000/docs
+#   可交互前端: http://127.0.0.1:8000/ui/index.html
+#   开启持久化: STEEL_DB=./steel.db uvicorn api.app:app
 ```
+
+## 使用前端
+
+1. 启动服务后打开 `http://127.0.0.1:8000/ui/index.html`。
+2. 点击「一键载入演示数据并登录」（创建商家 A/B、客户 C1 战略/C2 公域、货源与需求）。
+3. 进入各页面体验：
+   - **客户主权看板**：用商家 102 登录查询客户 11，可见"拒绝(owned_by_other)"——防撬客可视化。
+   - **智能撮合**：商家 102 撮合货源 2001，结果只含公域 C2(#12)，战略客户 C1(#11) 永不出现。
+   - **智能锁价**：选时长锁价、查看保证金、行权成交。
 
 ## 模块对应方向
 
-- 方向1 REST API：`api/`（FastAPI + OpenAPI 文档）。
-- 方向2 撮合模型化：`ranking.py`（逻辑回归 LTR + 反馈闭环），`matching.py` 训练后自动切换模型分。
-- 方向3 锁价与弃单挽回：`pricelock.py`、`recovery.py`。
-- 方向4 产品原型：见 `docs/08-产品原型与界面设计.md` 与 `docs/mockups/`。
+- REST API（鉴权/多租户）：`api/`（FastAPI + OpenAPI + Bearer 令牌，actor=已鉴权商家，防伪造冲抢）。
+- 撮合模型化：`ranking.py`（逻辑回归 LTR + 反馈闭环），`matching.py` 训练后自动切换模型分。
+- 锁价与弃单挽回：`pricelock.py`、`recovery.py`。
+- 真实持久化：`persistence.py` 基于 `sql/schema.sql` 的 SQLite 存储（init/save/load）。
+- 可交互前端：`frontend/`（Vue 3 CDN）。
+- 产品原型图：见 `docs/08-产品原型与界面设计.md` 与 `docs/mockups/`。
 
 ## 演示覆盖的关键结论
 
