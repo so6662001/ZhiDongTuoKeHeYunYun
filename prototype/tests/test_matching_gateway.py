@@ -61,6 +61,17 @@ class TestMatchingAndGateway(unittest.TestCase):
         log = self.gw.access_log_for_customer(11)
         self.assertTrue(any(a.result == "denied" for a in log))
 
+    def test_engine_uses_model_when_trained(self):
+        from steel_platform.ranking import LogisticRanker
+        ranker = LogisticRanker()
+        ranker.w = {"price": 5.0, "region": 0.0, "history": 0.0, "credit": 5.0, "urgency": 0.0}
+        ranker.b = -5.0
+        ranker.trained = True
+        self.match.ranker = ranker
+        feats = self.match.feature_vector(self.d2, self.listing)
+        self.assertAlmostEqual(self.match.score(self.d2, self.listing),
+                               round(ranker.predict(feats), 4))
+
 
 if __name__ == "__main__":
     unittest.main()

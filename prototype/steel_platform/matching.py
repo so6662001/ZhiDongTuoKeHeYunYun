@@ -7,10 +7,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from typing import Optional
+
 from .gateway import PermissionGateway
 from .matching_utils import region_proximity, spec_compatible
 from .models import Demand, Listing, Urgency
 from .ownership import OwnershipEngine
+from .ranking import LogisticRanker
 from .store import Store
 
 # 评分权重，可配置（docs/03 第 1.2 节）
@@ -34,10 +37,17 @@ class MatchResult:
 
 
 class MatchingEngine:
-    def __init__(self, store: Store, ownership: OwnershipEngine, gateway: PermissionGateway) -> None:
+    def __init__(
+        self,
+        store: Store,
+        ownership: OwnershipEngine,
+        gateway: PermissionGateway,
+        ranker: Optional[LogisticRanker] = None,
+    ) -> None:
         self.store = store
         self.ownership = ownership
         self.gateway = gateway
+        self.ranker = ranker  # 训练成熟后用模型分替代规则分
 
     def _price_match(self, demand: Demand, listing: Listing) -> float:
         if demand.target_price is None or listing.price <= 0:
@@ -63,15 +73,24 @@ class MatchingEngine:
         )
         return min(1.0, hits / 3.0)
 
+    def feature_vector(self, demand: Demand, listing: Listing) -> dict[str, float]:
+        """统一特征向量：规则评分与排序模型同源（docs/03）。"""
+        return {
+            "price": self._price_match(demand, listing),
+            "region": region_proximity(demand.delivery_region, listing.warehouse_region),
+            "history": self._history_fit(demand.enterprise_id, listing),
+            "credit": self._credit_score(demand.enterprise_id),
+            "urgency": URGENCY_SCORE[demand.urgency],
+        }
+
+    def rule_score(self, features: dict[str, float]) -> float:
+        return round(sum(WEIGHTS[f] * features[f] for f in WEIGHTS), 4)
+
     def score(self, demand: Demand, listing: Listing) -> float:
-        s = (
-            WEIGHTS["price"] * self._price_match(demand, listing)
-            + WEIGHTS["region"] * region_proximity(demand.delivery_region, listing.warehouse_region)
-            + WEIGHTS["history"] * self._history_fit(demand.enterprise_id, listing)
-            + WEIGHTS["credit"] * self._credit_score(demand.enterprise_id)
-            + WEIGHTS["urgency"] * URGENCY_SCORE[demand.urgency]
-        )
-        return round(s, 4)
+        feats = self.feature_vector(demand, listing)
+        if self.ranker is not None and self.ranker.trained:
+            return round(self.ranker.predict(feats), 4)
+        return self.rule_score(feats)
 
     def _is_eligible_demand(self, demand: Demand) -> bool:
         """需求可进公域撮合的条件：买方无私域归属，或买方主动公开。"""
