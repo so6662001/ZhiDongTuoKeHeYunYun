@@ -34,7 +34,7 @@ from steel_platform.models import (
     Urgency,
     Visibility,
 )
-from steel_platform.ownership import OwnershipEngine, StrategicConflict
+from steel_platform.ownership import OwnershipEngine, QuotaExceeded, StrategicConflict
 from steel_platform.persistence import connect, load_store, save_store
 from steel_platform.pricelock import PriceLockEngine
 from steel_platform.recovery import AbandonContext, RecoveryEngine
@@ -144,7 +144,26 @@ def create_app(db_path: Optional[str] = None) -> FastAPI:
                                            datetime.now())
         except StrategicConflict as e:
             raise HTTPException(status_code=409, detail=str(e))
-        return {"relation_id": rel.relation_id, "is_strategic": rel.is_strategic}
+        except QuotaExceeded as e:
+            raise HTTPException(status_code=403, detail=str(e))
+        return {"relation_id": rel.relation_id, "is_strategic": rel.is_strategic,
+                "strategic_used": state.own.strategic_used(ctx.merchant_id),
+                "strategic_quota": state.own.strategic_quota(ctx.merchant_id)}
+
+    @app.delete("/relations/strategic/{customer_id}")
+    def unmark_strategic(customer_id: int, ctx: MerchantContext = Depends(auth)):
+        rel = state.own.unmark_strategic(ctx.merchant_id, customer_id, datetime.now())
+        if rel is None:
+            raise HTTPException(404, "关系不存在")
+        return {"customer_id": customer_id, "is_strategic": rel.is_strategic}
+
+    @app.get("/strategic/quota")
+    def strategic_quota(ctx: MerchantContext = Depends(auth)):
+        now = datetime.now()
+        at_risk = state.own.at_risk_strategic(ctx.merchant_id, now)
+        return {"used": state.own.strategic_used(ctx.merchant_id),
+                "quota": state.own.strategic_quota(ctx.merchant_id),
+                "at_risk": [r.customer_enterprise_id for r in at_risk]}
 
     @app.get("/relations/arbitrate/{customer_id}")
     def arbitrate(customer_id: int, ctx: MerchantContext = Depends(auth)):

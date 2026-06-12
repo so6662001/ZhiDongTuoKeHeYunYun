@@ -102,6 +102,8 @@ class CustomerRelation:
     visibility: Visibility = Visibility.PRIVATE
     status: RelationStatus = RelationStatus.ACTIVE
     assigned_to: list[int] = field(default_factory=list)
+    last_interaction_at: Optional[datetime] = None
+    strategic_since: Optional[datetime] = None
 
 
 @dataclass

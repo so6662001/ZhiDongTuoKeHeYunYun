@@ -103,11 +103,12 @@ def save_store(store: Store, conn: sqlite3.Connection) -> None:
     for r in store.relations.values():
         cur.execute(
             "INSERT INTO customer_relation(relation_id,merchant_id,customer_enterprise_id,"
-            "relation_type,is_strategic,protect_until,visibility,status,created_at) "
-            "VALUES(?,?,?,?,?,?,?,?,?)",
+            "relation_type,is_strategic,protect_until,visibility,status,"
+            "last_interaction_at,strategic_since,created_at) "
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             (r.relation_id, r.merchant_id, r.customer_enterprise_id, r.relation_type.value,
              1 if r.is_strategic else 0, _s(r.protect_until), r.visibility.value,
-             r.status.value, _s(r.created_at)),
+             r.status.value, _s(r.last_interaction_at), _s(r.strategic_since), _s(r.created_at)),
         )
     for c in store.credit.values():
         cur.execute(
@@ -176,7 +177,9 @@ def load_store(conn: sqlite3.Connection) -> Store:
             protect_until=_dt(row["protect_until"]),
             is_strategic=bool(row["is_strategic"]),
             visibility=Visibility(row["visibility"]),
-            status=RelationStatus(row["status"])))
+            status=RelationStatus(row["status"]),
+            last_interaction_at=_dt(row["last_interaction_at"]),
+            strategic_since=_dt(row["strategic_since"])))
         max_id = max(max_id, row["relation_id"])
     for row in conn.execute("SELECT * FROM credit_profile"):
         store.add_credit(CreditProfile(

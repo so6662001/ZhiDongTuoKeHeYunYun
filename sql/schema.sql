@@ -101,9 +101,18 @@ CREATE TABLE IF NOT EXISTS customer_relation (
                               CHECK (visibility IN ('private','assigned','public')),
     status                  TEXT NOT NULL DEFAULT 'active'
                               CHECK (status IN ('active','expired','returned_to_pool')),
+    last_interaction_at     TEXT,        -- 战略客户"经营时钟"，用于反"圈而不耕"降级判断
+    strategic_since         TEXT,        -- 设为战略客户的时间
     created_at              TEXT NOT NULL,
     updated_at              TEXT,
     UNIQUE (merchant_id, customer_enterprise_id)
+);
+
+-- 商家战略名额配置（反囤积：战略客户是稀缺、需经营维持的有限资源）
+CREATE TABLE IF NOT EXISTS strategic_quota (
+    merchant_id     INTEGER PRIMARY KEY REFERENCES merchant(merchant_id),
+    quota           INTEGER NOT NULL DEFAULT 20,
+    updated_at      TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_relation_customer ON customer_relation(customer_enterprise_id);
 
