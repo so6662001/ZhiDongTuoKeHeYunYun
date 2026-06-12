@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>货袋子现货平台 · 智能获客/运营/转化</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <div id="app" class="layout">
+    <div v-html="nav"></div>
+    <div class="main">
+      <div class="topbar">
+        <h1>欢迎使用 · 智能客户经营平台</h1>
+        <div class="token-box">
+          当前身份：<select v-model="merchant" @change="switchMerchant">
+            <option value="101">甲贸易(商家101)</option>
+            <option value="102">乙批发(商家102)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>第一步 · 载入演示数据</h2>
+        <p class="muted">一键创建商家 A/B、客户 C1(A的战略客户)/C2(公域散客)、货源与需求，并自动登录。</p>
+        <div class="row">
+          <button class="btn primary" @click="seed" :disabled="loading">一键载入演示数据并登录</button>
+          <span v-if="msg" class="ok">{{ msg }}</span>
+          <span v-if="err" class="err">{{ err }}</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>功能导览</h2>
+        <table>
+          <tr><th>页面</th><th>演示要点</th></tr>
+          <tr><td><a href="dashboard.html">客户主权看板</a></td>
+              <td>查看私域/战略客户、谁访问过我的客户（防撬客审计）</td></tr>
+          <tr><td><a href="matching.html">智能撮合</a></td>
+              <td>公域货源撮合，验证战略客户 C1 永不被撮合给他人</td></tr>
+          <tr><td><a href="pricelock.html">智能锁价</a></td>
+              <td>波动期锁定价格，AI 提示与保证金</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return { nav: NavBar("index.html"), merchant: Session.merchant || "101",
+                 loading: false, msg: "", err: "" };
+      },
+      methods: {
+        switchMerchant() {
+          Session.merchant = this.merchant;
+          Session.token = "tok-" + this.merchant;
+          this.msg = "已切换为商家 " + this.merchant;
+        },
+        async seed() {
+          this.loading = true; this.err = ""; this.msg = "";
+          try {
+            await seedDemo();
+            Session.merchant = this.merchant;
+            Session.token = "tok-" + this.merchant;
+            this.msg = "演示数据载入完成，已登录商家 " + this.merchant + "，可前往各页面体验。";
+          } catch (e) {
+            this.err = "载入失败：" + (e.detail || JSON.stringify(e));
+          } finally { this.loading = false; }
+        },
+      },
+    }).mount("#app");
+  </script>
+</body>
+</html>

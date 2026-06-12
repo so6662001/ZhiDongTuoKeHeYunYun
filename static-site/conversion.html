@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能转化与风控 · 货袋子现货平台</title>
+<link rel="stylesheet" href="site.css" />
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">货袋子现货平台<small>智能获客 · 运营 · 转化</small></div>
+    <nav class="nav">
+      <a href="index.html"><span class="ico">📊</span>经营总览</a>
+      <a href="dashboard.html"><span class="ico">🛡️</span>客户主权看板</a>
+      <a href="acquisition.html"><span class="ico">🎯</span>智能获客</a>
+      <a href="operation.html"><span class="ico">🔄</span>智能客户运营</a>
+      <a class="active" href="conversion.html"><span class="ico">💰</span>智能转化与风控</a>
+    </nav>
+    <div class="side-foot">问价→锁价→打款→提货<br/>AI 给建议，人做决策</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>智能转化与风控</h1>
+        <div class="sub">建议报价 / 智能锁价 / 账期撮合 / 信用评分 / 弃单挽回</div>
+      </div>
+      <div class="idbox">当前身份：<b>甲贸易 · 商家101</b></div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h2>转化漏斗（近 30 天）</h2>
+        <div class="funnel">
+          <div class="step"><span class="lbl">询价</span><div class="bar" style="width:100%">3,180</div></div>
+          <div class="step"><span class="lbl">报价</span><div class="bar" style="width:82%">2,610</div><span class="rate">82.1%</span></div>
+          <div class="step"><span class="lbl">锁价</span><div class="bar" style="width:46%">1,460</div><span class="rate">55.9%</span></div>
+          <div class="step"><span class="lbl">下单</span><div class="bar" style="width:33%">1,040</div><span class="rate">71.2%</span></div>
+          <div class="step"><span class="lbl">打款提货</span><div class="bar" style="width:26%">812</div><span class="rate">78.1%</span></div>
+        </div>
+        <div class="row" style="margin-top:8px; gap:18px;">
+          <span class="kpi-sm">锁价订单占比 <b style="color:var(--ink)">46%</b></span>
+          <span class="kpi-sm">平均成交时长 <b style="color:var(--ink)">6.2h</b></span>
+          <span class="kpi-sm">弃单挽回率 <b style="color:var(--green)">31%</b></span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🤖 智能建议报价 · 询价 #7781</h2>
+        <p class="desc">买方：沧州中建（信用 A）· HRB400E Φ20 · 120 吨</p>
+        <div class="row" style="gap:20px; margin:6px 0 12px;">
+          <div><div class="kpi-sm">建议区间（仅卖方可见）</div>
+            <div style="font-size:20px;font-weight:800;">3,805 ~ <span style="color:var(--primary)">3,835</span> ~ 3,860</div></div>
+        </div>
+        <div class="hint">🤖 理由：低于近 7 天均价 1.5%，库龄 25 天建议走量；买方信用 A 可优惠。</div>
+        <div class="row" style="margin-top:14px;">
+          <button class="btn primary sm">一键按 3,835 报价</button>
+          <button class="btn ghost sm">自定义</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h2>智能锁价</h2>
+        <p class="desc">波动期为买方锁定价格，降低犹豫；保证金防恶意占价。</p>
+        <div class="row" style="margin:8px 0;">
+          <span class="muted">当前价</span><b style="font-size:18px;">¥3,820 / 吨</b>
+          <span class="badge green">近7日低位</span>
+        </div>
+        <div class="row" style="margin:10px 0;">
+          <span class="muted">锁价时长</span>
+          <span class="seg"><span>2小时</span><span class="on">6小时</span><span>24小时</span></span>
+        </div>
+        <div class="row" style="margin:10px 0;">
+          <span class="muted">锁定数量</span><span class="chip">200 吨</span>
+          <span class="muted">保证金(1%)</span><span class="chip">¥7,640</span>
+        </div>
+        <div class="hint" style="margin:10px 0;">🤖 当前价处于近 7 天低位，建议锁价。</div>
+        <div class="row"><button class="btn green sm">确认锁价</button>
+          <span class="muted kpi-sm">锁价单 #L2207 · 状态 active · 6h 后到期</span></div>
+      </div>
+
+      <div class="panel">
+        <h2>信用评分与账期推荐</h2>
+        <p class="desc">基于回款/履约/取消率/经营年限，决定可给账期与预付。</p>
+        <table>
+          <tr><th>客户</th><th>信用分</th><th>等级</th><th>账期</th><th>预付</th></tr>
+          <tr><td>沧州中建</td><td>93</td><td><span class="badge green">A</span></td><td>30 天</td><td>0%</td></tr>
+          <tr><td>唐山宏发</td><td>74</td><td><span class="badge blue">B</span></td><td>15 天</td><td>0%</td></tr>
+          <tr><td>邢台散户</td><td>56</td><td><span class="badge amber">C</span></td><td>0 天</td><td>50%</td></tr>
+          <tr class="denied"><td>新注册无资质</td><td>35</td><td><span class="badge red">D</span></td><td>—</td><td>100%（现款现货）</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>弃单挽回 · 工单</h2>
+      <p class="desc">询价超 24h 未成交自动诊断卡点；让利/账期类动作需人工确认。</p>
+      <div class="grid3">
+        <div style="border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="row" style="justify-content:space-between"><b>邯郸金鼎</b><span class="badge red">价格过高</span></div>
+          <div class="muted" style="margin:8px 0; font-size:13px;">报价高于其历史均价约 90 元/吨。</div>
+          <div class="say">让利 40 元/吨 或推平价替代货源。</div>
+          <div class="row" style="margin-top:10px;"><span class="badge amber">需人工确认</span></div>
+        </div>
+        <div style="border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="row" style="justify-content:space-between"><b>衡水建工</b><span class="badge blue">账期不满</span></div>
+          <div class="muted" style="margin:8px 0; font-size:13px;">曾申请更长账期，信用 B。</div>
+          <div class="say">在信用额度内放宽至 15 天账期。</div>
+          <div class="row" style="margin-top:10px;"><span class="badge amber">需人工确认</span></div>
+        </div>
+        <div style="border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="row" style="justify-content:space-between"><b>保定散户</b><span class="badge gray">观望</span></div>
+          <div class="muted" style="margin:8px 0; font-size:13px;">价格敏感度高 + 行情震荡。</div>
+          <div class="say">推送锁价提示 / 低点提醒。</div>
+          <div class="row" style="margin-top:10px;"><span class="badge green">可自动执行</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">说明：静态演示数据为示意。对应引擎：matching/credit/pricelock/recovery；接口：/credit/terms、/pricelock、/recovery/plan。</p>
+  </main>
+</div>
+</body>
+</html>

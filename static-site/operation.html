@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能客户运营 · 货袋子现货平台</title>
+<link rel="stylesheet" href="site.css" />
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">货袋子现货平台<small>智能获客 · 运营 · 转化</small></div>
+    <nav class="nav">
+      <a href="index.html"><span class="ico">📊</span>经营总览</a>
+      <a href="dashboard.html"><span class="ico">🛡️</span>客户主权看板</a>
+      <a href="acquisition.html"><span class="ico">🎯</span>智能获客</a>
+      <a class="active" href="operation.html"><span class="ico">🔄</span>智能客户运营</a>
+      <a href="conversion.html"><span class="ico">💰</span>智能转化与风控</a>
+    </nav>
+    <div class="side-foot">运营只服务归属商家<br/>平台用 AI 帮你服务好你的客户</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>智能客户运营</h1>
+        <div class="sub">用价格/库存/账期变化持续制造高质量触达 — 养熟、提复购</div>
+      </div>
+      <div class="idbox">当前身份：<b>甲贸易 · 商家101</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>客户分层矩阵 · 价值 × 生命周期</h2>
+      <p class="desc">每格配差异化策略；数字为该格客户数。</p>
+      <div class="matrix">
+        <div class="head"></div>
+        <div class="head">新客</div><div class="head">活跃复购</div><div class="head">沉睡</div><div class="head">流失风险</div>
+        <div class="v">高价值</div>
+        <div class="cell h2"><b>28</b>首单礼遇</div><div class="cell h4"><b>146</b>重点维护</div><div class="cell h2"><b>22</b>优先唤醒</div><div class="cell h1"><b>9</b>人工介入</div>
+        <div class="v">中价值</div>
+        <div class="cell h1"><b>64</b>促首单</div><div class="cell h3"><b>318</b>周期补货</div><div class="cell h2"><b>87</b>低价唤醒</div><div class="cell h1"><b>31</b>预警</div>
+        <div class="v">低价值</div>
+        <div class="cell h1"><b>112</b>自动化</div><div class="cell h2"><b>205</b>轻触达</div><div class="cell h1"><b>96</b>低频</div><div class="cell h1"><b>54</b>观察</div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h2>自动触达 · 触发器队列</h2>
+        <p class="desc">scope=owner_only，统一频控，夜间静默。</p>
+        <table>
+          <tr><th>触发器</th><th>客户</th><th>消息</th><th>通道</th></tr>
+          <tr class="hot">
+            <td><span class="badge blue">智能补货</span></td>
+            <td>河北顺达 #11</td>
+            <td class="muted">您常采的螺纹今日到货，价格可谈，已 22 天未采购。</td>
+            <td>微信</td>
+          </tr>
+          <tr>
+            <td><span class="badge amber">价格异动</span></td>
+            <td>关注热卷的 64 户</td>
+            <td class="muted">热卷今日上涨 80 元/吨，注意成本变化。</td>
+            <td>短信</td>
+          </tr>
+          <tr>
+            <td><span class="badge red">流失预警</span></td>
+            <td>邯郸金鼎 #41</td>
+            <td class="muted">成交频次下降 + 回款变慢，建议业务员回访。</td>
+            <td>工单</td>
+          </tr>
+          <tr>
+            <td><span class="badge green">账期提醒</span></td>
+            <td>唐山宏发 #23</td>
+            <td class="muted">7 天账期明日到期，到账后可锁今日低点。</td>
+            <td>微信</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>🤖 AI 销售副驾驶 · 客户简报</h2>
+        <p class="desc">进入客户即生成画像、进展与下一步建议。</p>
+        <div style="border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="row" style="justify-content:space-between">
+            <b>河北顺达建材（终端 · 高价值）</b><span class="badge blue">战略客户</span>
+          </div>
+          <div class="row" style="gap:8px; margin:10px 0;">
+            <span class="chip">主营 螺纹</span><span class="chip">复购≈18天</span>
+            <span class="chip">价格敏感 中</span><span class="chip">回款 优(98%)</span><span class="chip">偏好 华北仓</span>
+          </div>
+          <div class="muted" style="font-size:13px;">上次沟通：6/4 询 Φ20 报 3,840 未成交（嫌高）。</div>
+          <div class="todo" style="margin-top:12px;">
+            <b>建议下一步</b>
+            <div class="why">复购周期已到，今日 Φ20 较上次低 30 元/吨，信用优可给 7 天账期。</div>
+            <div class="say">话术：王总，今天 Φ20 到 3,810 比上次低 30，给您留 200 吨 + 7 天账期，要不要锁个价？</div>
+          </div>
+          <div class="row"><button class="btn primary sm">一键发送</button><button class="btn ghost sm">打电话</button><span class="muted kpi-sm">发送后自动回写 CRM</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">说明：静态演示数据为示意。对应引擎：triggers.py（触发器）/ credit.py / 画像标签；接口：/triggers/restock。</p>
+  </main>
+</div>
+</body>
+</html>

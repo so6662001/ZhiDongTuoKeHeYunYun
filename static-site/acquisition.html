@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>智能获客 · 货袋子现货平台</title>
+<link rel="stylesheet" href="site.css" />
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">货袋子现货平台<small>智能获客 · 运营 · 转化</small></div>
+    <nav class="nav">
+      <a href="index.html"><span class="ico">📊</span>经营总览</a>
+      <a href="dashboard.html"><span class="ico">🛡️</span>客户主权看板</a>
+      <a class="active" href="acquisition.html"><span class="ico">🎯</span>智能获客</a>
+      <a href="operation.html"><span class="ico">🔄</span>智能客户运营</a>
+      <a href="conversion.html"><span class="ico">💰</span>智能转化与风控</a>
+    </nav>
+    <div class="side-foot">撮合只动公域<br/>私域/战略客户绝不分发</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>智能获客</h1>
+        <div class="sub">把已有供需数据变成线索 — 公域撮合 / 线索评分 / 行情钩子</div>
+      </div>
+      <div class="idbox">当前身份：<b>乙批发 · 商家102</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>智能供需撮合 · 货源 #2001（HRB400E Φ20 · 500吨 · 华北石家庄 · ¥3,820）</h2>
+      <p class="desc">为我的公域货源反向匹配买方需求，按匹配度排序推送。</p>
+      <div class="mcard">
+        <div>
+          <div><b>公域散客 C2 · 邢台某门店</b> <span class="badge gray">公域</span></div>
+          <div class="meta">求购 50 吨 · 收货华北 · 心理价 3,850 · 价格/区域/信用 综合匹配</div>
+        </div>
+        <div style="text-align:right">
+          <div class="score">95<small>/100</small></div>
+          <button class="btn green sm" style="margin-top:6px">推送询价卡片</button>
+        </div>
+      </div>
+      <div class="mcard">
+        <div>
+          <div><b>沧州中建采购（终端）</b> <span class="badge gray">公域</span></div>
+          <div class="meta">求购 120 吨 · 收货华北 · 历史成交契合度高</div>
+        </div>
+        <div style="text-align:right">
+          <div class="score">88<small>/100</small></div>
+          <button class="btn green sm" style="margin-top:6px">推送询价卡片</button>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:6px;">🛡️ A 的战略客户 C1（河北顺达 #11）虽近期询过同规格，但属私域，<b>绝不出现在撮合结果中</b>。</div>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h2>AI 线索评分</h2>
+        <p class="desc">对注册未活跃企业打分，分高潜/沉睡/无效，并给出切入建议。</p>
+        <table>
+          <tr><th>企业</th><th>评分</th><th>分级</th><th>建议动作</th></tr>
+          <tr>
+            <td>邢台路桥（终端）</td>
+            <td><div class="prog" style="width:90px"><i style="width:86%"></i></div></td>
+            <td><span class="badge green">高潜 86</span></td>
+            <td class="muted">主推 Φ20，3,820 切入，可给 7 天账期</td>
+          </tr>
+          <tr>
+            <td>衡水建材城散户</td>
+            <td><div class="prog" style="width:90px"><i style="width:58%;background:var(--amber)"></i></div></td>
+            <td><span class="badge amber">沉睡 58</span></td>
+            <td class="muted">用低价好货 + 行情提醒唤醒</td>
+          </tr>
+          <tr>
+            <td>未知来源批量注册号</td>
+            <td><div class="prog" style="width:90px"><i style="width:22%;background:var(--steel)"></i></div></td>
+            <td><span class="badge gray">无效 22</span></td>
+            <td class="muted">低频维护，节省资源</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>行情钩子 · 今日可转发卡片</h2>
+        <p class="desc">钢铁人每天必看，转发到客户群裂变拉新，成本最低。</p>
+        <div style="border:1px solid var(--line); border-radius:12px; padding:14px;">
+          <div class="row" style="justify-content:space-between">
+            <b>📈 今日华北钢价</b><span class="kpi-sm">2026-06-12</span>
+          </div>
+          <div class="trend" style="margin:12px 0">
+            <span style="height:30px"></span><span style="height:38px"></span><span style="height:28px"></span>
+            <span style="height:44px"></span><span style="height:34px"></span><span class="lo" style="height:24px"></span>
+            <span class="lo" style="height:20px"></span><span style="height:30px"></span>
+          </div>
+          <table>
+            <tr><td>螺纹 HRB400E Φ20</td><td><b>3,820</b></td><td><span class="tag-deny">▼ 20</span></td></tr>
+            <tr><td>热卷 Q235 4.75</td><td><b>3,910</b></td><td><span class="tag-allow">▲ 15</span></td></tr>
+            <tr><td>盘螺 HRB400E Φ8</td><td><b>3,960</b></td><td><span class="muted">— 0</span></td></tr>
+          </table>
+          <div class="row" style="margin-top:12px; justify-content:space-between;">
+            <span class="kpi-sm">分享带来新客 · 本周 +37</span>
+            <button class="btn primary sm">一键转发到客户群</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">说明：静态演示数据为示意。对应引擎：matching.py（评分排序）/ ranking.py（LTR）；接口：/match/listing、/match/demand。</p>
+  </main>
+</div>
+</body>
+</html>
