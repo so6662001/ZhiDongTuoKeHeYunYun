@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Optional
 
+from . import value as value_model
 from .models import CustomerRelation, RelationStatus, RelationType, Visibility
 from .store import Store
 
@@ -29,9 +30,9 @@ RELATION_RANK: dict[RelationType, int] = {
 }
 
 # 反囤积治理参数（docs/02 第 11 节）
-DEFAULT_STRATEGIC_QUOTA = 20          # 单商家战略名额默认上限（按等级/GMV 可调）
 STRATEGIC_REVIEW_DAYS = 180           # 战略客户超此天数无真实互动 -> 进入"待复核/告警"
 STRATEGIC_GRACE_DAYS = 365            # 战略客户超此天数无真实互动 -> 降级为普通保护（非直接入公海）
+STRATEGIC_VALUE_FLOOR = 40.0          # 战略客户价值准入门槛（0-100）
 
 
 class StrategicConflict(Exception):
@@ -39,27 +40,63 @@ class StrategicConflict(Exception):
 
 
 class QuotaExceeded(Exception):
-    """战略客户名额已用尽，不能把更多客户圈为战略（反囤积）。"""
+    """战略容量已满，不能把更多客户圈为战略（反囤积）。"""
+
+
+class NotEligibleStrategic(Exception):
+    """客户价值未达战略准入门槛（价值导向，而非随意圈地）。"""
 
 
 class OwnershipEngine:
-    def __init__(self, store: Store, default_strategic_quota: int = DEFAULT_STRATEGIC_QUOTA) -> None:
+    def __init__(self, store: Store, value_gate: bool = False,
+                 value_floor: float = STRATEGIC_VALUE_FLOOR) -> None:
         self.store = store
-        self.default_strategic_quota = default_strategic_quota
+        self.value_gate = value_gate          # 冷启动可关闭，数据充足后开启（先规则后模型）
+        self.value_floor = value_floor
         self._quota_override: dict[int, int] = {}
 
-    # ---------------- 战略名额（配额）----------------
+    # ---------------- 战略容量（动态，按价值与规模）----------------
     def set_strategic_quota(self, merchant_id: int, quota: int) -> None:
+        """显式覆盖容量（如按付费档封顶）；不设则用动态容量。"""
         self._quota_override[merchant_id] = quota
 
+    def strategic_capacity(self, merchant_id: int) -> int:
+        if merchant_id in self._quota_override:
+            return self._quota_override[merchant_id]
+        return value_model.dynamic_capacity(self.store, merchant_id)
+
+    # 兼容旧命名
     def strategic_quota(self, merchant_id: int) -> int:
-        return self._quota_override.get(merchant_id, self.default_strategic_quota)
+        return self.strategic_capacity(merchant_id)
 
     def strategic_used(self, merchant_id: int) -> int:
         return sum(
             1 for r in self.store.relations_of_merchant(merchant_id)
             if r.is_strategic and r.status != RelationStatus.RETURNED_TO_POOL
         )
+
+    def customer_value(self, merchant_id: int, customer_id: int, now: datetime) -> float:
+        return value_model.customer_value_score(self.store, merchant_id, customer_id, now)
+
+    def strategic_eligibility(self, merchant_id: int, customer_id: int, now: datetime) -> dict:
+        """战略客户资格评估：价值准入 + 动态容量。返回结构化结果。"""
+        already = False
+        rel = self.store.relation_of(merchant_id, customer_id)
+        if rel is not None and rel.is_strategic:
+            already = True
+        score = self.customer_value(merchant_id, customer_id, now)
+        used = self.strategic_used(merchant_id)
+        cap = self.strategic_capacity(merchant_id)
+        reasons = []
+        ok = True
+        if self.value_gate and not already and score < self.value_floor:
+            ok = False
+            reasons.append(f"价值分 {score} < 准入门槛 {self.value_floor}")
+        if not already and used >= cap:
+            ok = False
+            reasons.append(f"战略容量已满 {used}/{cap}")
+        return {"ok": ok, "value_score": score, "used": used, "capacity": cap,
+                "already": already, "reason": "；".join(reasons) or "符合战略客户标准"}
 
     def establish(
         self,
@@ -113,20 +150,24 @@ class OwnershipEngine:
         return rel
 
     def mark_strategic(self, merchant_id: int, customer_id: int, now: datetime) -> CustomerRelation:
-        """标记战略客户：强制 private + 占用战略名额（配额受限，防囤积）。全局互斥。"""
+        """标记战略客户：价值准入 + 动态容量 + 强制 private。全局互斥。"""
         for other in self.store.relations_for_customer(customer_id):
             if other.is_strategic and other.merchant_id != merchant_id:
                 raise StrategicConflict(
                     f"客户 {customer_id} 已被商家 {other.merchant_id} 设为战略客户"
                 )
+        elig = self.strategic_eligibility(merchant_id, customer_id, now)
+        if not elig["already"]:
+            if self.value_gate and elig["value_score"] < self.value_floor:
+                raise NotEligibleStrategic(
+                    f"客户 {customer_id} 价值分 {elig['value_score']} 未达战略准入门槛 {self.value_floor}"
+                )
+            if elig["used"] >= elig["capacity"]:
+                raise QuotaExceeded(
+                    f"商家 {merchant_id} 战略容量已满（{elig['used']}/{elig['capacity']}），"
+                    f"请释放低价值名额或随规模/付费档提升容量"
+                )
         rel = self.store.relation_of(merchant_id, customer_id)
-        already = rel is not None and rel.is_strategic
-        if not already and self.strategic_used(merchant_id) >= self.strategic_quota(merchant_id):
-            raise QuotaExceeded(
-                f"商家 {merchant_id} 战略名额已满"
-                f"（{self.strategic_used(merchant_id)}/{self.strategic_quota(merchant_id)}），"
-                f"请释放部分名额或升级套餐"
-            )
         if rel is None:
             rel = self.establish(merchant_id, customer_id, RelationType.CLAIMED, now)
         rel.is_strategic = True
@@ -235,5 +276,10 @@ class OwnershipEngine:
         return max(candidates, key=sort_key)
 
     def is_owned(self, customer_id: int) -> bool:
-        """是否存在私域归属（决定其需求能否进公域撮合）。"""
+        """是否存在私域归属（决定其需求能否被平台主动 push 撮合）。"""
         return self.arbitrate(customer_id) is not None
+
+    def active_owner_merchant(self, customer_id: int) -> Optional[int]:
+        """该客户当前归属商家（用于买方主动公开寻源时授予老关系优先响应权）。"""
+        rel = self.arbitrate(customer_id)
+        return rel.merchant_id if rel else None

@@ -34,7 +34,12 @@ from steel_platform.models import (
     Urgency,
     Visibility,
 )
-from steel_platform.ownership import OwnershipEngine, QuotaExceeded, StrategicConflict
+from steel_platform.ownership import (
+    NotEligibleStrategic,
+    OwnershipEngine,
+    QuotaExceeded,
+    StrategicConflict,
+)
 from steel_platform.persistence import connect, load_store, save_store
 from steel_platform.pricelock import PriceLockEngine
 from steel_platform.recovery import AbandonContext, RecoveryEngine
@@ -144,11 +149,24 @@ def create_app(db_path: Optional[str] = None) -> FastAPI:
                                            datetime.now())
         except StrategicConflict as e:
             raise HTTPException(status_code=409, detail=str(e))
-        except QuotaExceeded as e:
+        except (QuotaExceeded, NotEligibleStrategic) as e:
             raise HTTPException(status_code=403, detail=str(e))
         return {"relation_id": rel.relation_id, "is_strategic": rel.is_strategic,
                 "strategic_used": state.own.strategic_used(ctx.merchant_id),
-                "strategic_quota": state.own.strategic_quota(ctx.merchant_id)}
+                "strategic_capacity": state.own.strategic_capacity(ctx.merchant_id)}
+
+    @app.get("/strategic/eligibility/{customer_id}")
+    def strategic_eligibility(customer_id: int, ctx: MerchantContext = Depends(auth)):
+        return state.own.strategic_eligibility(ctx.merchant_id, customer_id, datetime.now())
+
+    @app.post("/relations/customer-opt-out")
+    def customer_opt_out(body: RelationIn, merchant_id: int, ctx: MerchantContext = Depends(auth)):
+        """客户侧主动解除与某商家的绑定（买方主权/反囤积兜底）。"""
+        rel = state.own.customer_opt_out(merchant_id, body.customer_enterprise_id, datetime.now())
+        if rel is None:
+            raise HTTPException(404, "关系不存在")
+        return {"customer_id": body.customer_enterprise_id, "released_from": merchant_id,
+                "status": rel.status.value}
 
     @app.delete("/relations/strategic/{customer_id}")
     def unmark_strategic(customer_id: int, ctx: MerchantContext = Depends(auth)):

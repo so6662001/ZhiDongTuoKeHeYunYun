@@ -34,6 +34,7 @@ class MatchResult:
     listing: Listing
     score: float
     rationale: str
+    priority: bool = False  # 买方主动公开寻源时，归属商家(老关系)享优先响应权
 
 
 class MatchingEngine:
@@ -93,7 +94,12 @@ class MatchingEngine:
         return self.rule_score(feats)
 
     def _is_eligible_demand(self, demand: Demand) -> bool:
-        """需求可进公域撮合的条件：买方无私域归属，或买方主动公开。"""
+        """需求可参与撮合的条件，区分两条通道：
+
+        - 平台 Push（被动分发）：买方有私域归属 -> 不进，绝不替卖家把客户分给同行（防撬客）。
+        - 买方 Pull（主动公开寻源 is_public=True）：买方主权，可向任意卖家询价，
+          即使买方是某商家的私域/战略客户也允许；但归属商家享优先响应权（见 match_for_demand）。
+        """
         if self.ownership.is_owned(demand.enterprise_id) and not demand.is_public:
             return False
         return True
@@ -123,9 +129,17 @@ class MatchingEngine:
         return results[:top_n]
 
     def match_for_demand(self, demand: Demand, top_n: int = 5) -> list[MatchResult]:
-        """买方需求 -> 正向匹配公域货源。"""
+        """买方需求 -> 正向匹配公域货源。
+
+        若是买方主动公开寻源(is_public)且买方为某商家的归属客户，
+        归属商家(老关系)货源标记 priority 并排序靠前——尊重买方寻源自由的同时给老关系优先响应权。
+        """
         if not self._is_eligible_demand(demand):
             return []
+        owner_mid = (
+            self.ownership.active_owner_merchant(demand.enterprise_id)
+            if demand.is_public else None
+        )
         results: list[MatchResult] = []
         for listing in self.gateway.public_listings():
             if not spec_compatible(demand.category, demand.spec, listing.category, listing.spec):
@@ -133,8 +147,11 @@ class MatchingEngine:
             if listing.quantity < demand.quantity * 0.5:
                 continue
             sc = self.score(demand, listing)
+            is_priority = owner_mid is not None and listing.merchant_id == owner_mid
             results.append(
-                MatchResult(demand=demand, listing=listing, score=sc, rationale=f"得分 {sc}")
+                MatchResult(demand=demand, listing=listing, score=sc,
+                            rationale=("归属商家优先响应 · " if is_priority else "") + f"得分 {sc}",
+                            priority=is_priority)
             )
-        results.sort(key=lambda r: r.score, reverse=True)
+        results.sort(key=lambda r: (r.priority, r.score), reverse=True)
         return results[:top_n]
