@@ -13,9 +13,16 @@ prototype/
 │   ├── gateway.py         # 权限/归属网关：可见性过滤+审计（docs/06）
 │   ├── matching.py        # 公域撮合评分引擎（docs/03）
 │   ├── matching_utils.py  # 规格兼容/区域邻近度
+│   ├── ranking.py         # LTR 排序模型 + 反馈闭环（docs/03 模型化升级）
 │   ├── credit.py          # 信用评分与账期推荐（docs/05）
+│   ├── pricelock.py       # 智能锁价引擎（docs/05）
+│   ├── recovery.py        # 弃单挽回引擎（docs/05）
 │   └── triggers.py        # 触发器引擎：补货/价格异动（docs/04）
-├── tests/                 # unittest 单元测试
+├── api/                   # FastAPI REST 接口层
+│   ├── app.py             # 应用与路由（含 /docs Swagger）
+│   └── schemas.py         # Pydantic 请求/响应模型
+├── tests/                 # unittest 单元测试（41 个）
+├── requirements.txt       # API 层依赖（核心引擎零依赖）
 └── demo.py                # 端到端演示脚本
 ```
 
@@ -25,9 +32,20 @@ prototype/
 # 端到端演示（5 个场景，含防撬客断言）
 python3 prototype/demo.py
 
-# 单元测试
-cd prototype/tests && python3 -m unittest discover -p "test_*.py" -v
+# 单元测试（41 个，纯标准库 + API 层）
+cd prototype && python3 -m unittest discover -s tests -p "test_*.py"
+
+# 启动 REST API（需先 pip install -r requirements.txt）
+cd prototype && uvicorn api.app:app --reload
+# 浏览器打开 http://127.0.0.1:8000/docs 查看交互式 API 文档
 ```
+
+## 模块对应方向
+
+- 方向1 REST API：`api/`（FastAPI + OpenAPI 文档）。
+- 方向2 撮合模型化：`ranking.py`（逻辑回归 LTR + 反馈闭环），`matching.py` 训练后自动切换模型分。
+- 方向3 锁价与弃单挽回：`pricelock.py`、`recovery.py`。
+- 方向4 产品原型：见 `docs/08-产品原型与界面设计.md` 与 `docs/mockups/`。
 
 ## 演示覆盖的关键结论
 
