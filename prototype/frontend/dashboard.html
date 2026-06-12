@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>客户主权看板</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <div id="app" class="layout">
+    <div v-html="nav"></div>
+    <div class="main">
+      <div class="topbar">
+        <h1>客户主权看板</h1>
+        <div class="token-box">当前身份：商家 {{ merchant }}</div>
+      </div>
+
+      <div class="cards">
+        <div class="stat"><div class="label">私域客户数</div><div class="value">{{ stats.total }}</div></div>
+        <div class="stat"><div class="label">战略客户</div><div class="value">{{ stats.strategic }}</div></div>
+        <div class="stat"><div class="label">公域可见</div><div class="value">{{ stats.public }}</div></div>
+        <div class="stat good"><div class="label">客户主权投诉</div><div class="value">0</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>我的客户</h2>
+        <table>
+          <tr><th>客户</th><th>归属类型</th><th>状态</th><th>可见性</th><th>操作</th></tr>
+          <tr v-for="c in customers" :key="c.customer_enterprise_id">
+            <td>{{ c.name }} <span class="muted">#{{ c.customer_enterprise_id }}</span></td>
+            <td>{{ c.relation_type }}</td>
+            <td><span class="badge" :class="c.is_strategic ? 'blue' : 'green'">
+                {{ c.is_strategic ? '战略锁定' : c.status }}</span></td>
+            <td>{{ c.visibility }}</td>
+            <td>
+              <button v-if="!c.is_strategic" class="btn ghost"
+                @click="markStrategic(c.customer_enterprise_id)">设为战略客户</button>
+              <span v-else class="muted">永不入公海</span>
+            </td>
+          </tr>
+          <tr v-if="!customers.length"><td colspan="5" class="muted">暂无数据，请先在首页载入演示数据。</td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>客户访问审计 · "我的客户被谁访问过"</h2>
+        <div class="row" style="margin-bottom:12px;">
+          <input type="number" v-model="auditId" placeholder="客户ID，如 11" />
+          <button class="btn primary" @click="loadAudit">查询审计</button>
+          <span v-if="err" class="err">{{ err }}</span>
+        </div>
+        <table>
+          <tr><th>访问方商家</th><th>动作</th><th>结果</th><th>原因</th></tr>
+          <tr v-for="(a,i) in audits" :key="i" :class="a.result==='denied' ? 'denied' : ''">
+            <td>商家 {{ a.actor_merchant_id }}</td>
+            <td>{{ a.action }}</td>
+            <td><span :class="a.result==='allowed' ? 'tag-allow' : 'tag-deny'">
+                {{ a.result==='allowed' ? '允许' : '拒绝' }}</span></td>
+            <td class="muted">{{ a.reason }}</td>
+          </tr>
+        </table>
+        <p class="muted" style="margin-top:10px;">提示：用商家 102 登录查询客户 11，会看到"拒绝(owned_by_other)"——防撬客生效。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return { nav: NavBar("dashboard.html"), merchant: Session.merchant || "101",
+                 customers: [], audits: [], auditId: 11, err: "" };
+      },
+      computed: {
+        stats() {
+          return {
+            total: this.customers.length,
+            strategic: this.customers.filter(c => c.is_strategic).length,
+            public: this.customers.filter(c => c.visibility === "public").length,
+          };
+        },
+      },
+      methods: {
+        async load() {
+          this.err = "";
+          try { this.customers = await api("/my/customers"); }
+          catch (e) { this.err = "请先在首页登录/载入数据：" + (e.detail || e.status); }
+        },
+        async markStrategic(id) {
+          try { await api("/relations/strategic", { method: "POST",
+                  body: { customer_enterprise_id: id } }); await this.load(); }
+          catch (e) { this.err = e.detail || JSON.stringify(e); }
+        },
+        async loadAudit() {
+          this.err = "";
+          try { this.audits = await api("/audit/" + this.auditId); }
+          catch (e) { this.err = "查询失败（可能无权访问该客户）：" + (e.detail || e.status); this.audits = []; }
+        },
+      },
+      mounted() { this.load(); },
+    }).mount("#app");
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能撮合</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <div id="app" class="layout">
+    <div v-html="nav"></div>
+    <div class="main">
+      <div class="topbar">
+        <h1>智能撮合 · 公域货源匹配</h1>
+        <div class="token-box">当前身份：商家 {{ merchant }}</div>
+      </div>
+
+      <div class="panel">
+        <h2>为我的货源寻找买家</h2>
+        <div class="row">
+          <input type="number" v-model="listingId" />
+          <button class="btn primary" @click="run">运行智能撮合</button>
+          <span v-if="err" class="err">{{ err }}</span>
+        </div>
+        <p class="muted" style="margin-top:8px;">
+          用商家 102 登录、货源 2001 撮合：结果只含公域散客 C2(#12)，A 的战略客户 C1(#11) 永不出现——防撬客铁律。
+        </p>
+      </div>
+
+      <div class="panel" v-if="results.length">
+        <h2>撮合结果（已剔除任何私域/战略客户）</h2>
+        <div class="match-card" v-for="m in results" :key="m.demand_id">
+          <div>
+            <div><b>买家需求 #{{ m.demand_id }}</b> · 企业 {{ m.buyer_enterprise_id }}</div>
+            <div class="meta">{{ m.rationale }}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="score">{{ (m.score*100).toFixed(0) }}<span class="muted" style="font-size:13px">/100</span></div>
+            <button class="btn green" style="margin-top:6px">推送询价卡片</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel" v-else-if="ran">
+        <p class="muted">无匹配结果（或货源非公域）。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return { nav: NavBar("matching.html"), merchant: Session.merchant || "102",
+                 listingId: 2001, results: [], ran: false, err: "" };
+      },
+      methods: {
+        async run() {
+          this.err = ""; this.ran = false;
+          try {
+            this.results = await api("/match/listing/" + this.listingId, { method: "POST" });
+            this.ran = true;
+          } catch (e) {
+            this.err = "撮合失败：" + (e.detail || e.status) + "（货源需属于当前登录商家）";
+            this.results = [];
+          }
+        },
+      },
+    }).mount("#app");
+  </script>
+</body>
+</html>

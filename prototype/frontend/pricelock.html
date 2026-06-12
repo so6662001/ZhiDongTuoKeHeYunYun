@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能锁价</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="app.js"></script>
+</head>
+<body>
+  <div id="app" class="layout">
+    <div v-html="nav"></div>
+    <div class="main">
+      <div class="topbar">
+        <h1>智能锁价</h1>
+        <div class="token-box">当前身份：商家 {{ merchant }}</div>
+      </div>
+
+      <div class="panel">
+        <h2>HRB400E 螺纹钢 Φ20 · 当前价 {{ price }} 元/吨</h2>
+        <div class="trend">
+          <span v-for="(h,i) in trend" :key="i" :style="{height: h+'px'}"></span>
+        </div>
+        <div class="hint" style="margin:16px 0;">🤖 AI 提示：当前价处于近 7 天低位，建议锁价。</div>
+
+        <div class="row" style="margin-bottom:14px;">
+          <span class="muted">锁价时长：</span>
+          <div class="seg">
+            <button v-for="d in durations" :key="d" :class="{on: duration===d}"
+              @click="duration=d">{{ d }}小时</button>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:14px;">
+          <span class="muted">锁定数量(吨)：</span>
+          <input type="number" v-model.number="qty" />
+          <span class="muted">行情波动率：</span>
+          <input type="number" step="0.01" v-model.number="volatility" style="width:90px" />
+        </div>
+        <div class="row" style="margin-bottom:14px;">
+          <span class="muted">预估保证金：</span>
+          <b>¥ {{ (price*qty*0.01).toFixed(0) }}</b>
+        </div>
+        <div class="row">
+          <button class="btn green" @click="lock" :disabled="!!lockId">确认锁价</button>
+          <button class="btn primary" v-if="lockId" @click="exercise">在锁价内下单（行权）</button>
+          <span v-if="msg" class="ok">{{ msg }}</span>
+          <span v-if="err" class="err">{{ err }}</span>
+        </div>
+      </div>
+
+      <div class="panel" v-if="lockId">
+        <h2>锁价单</h2>
+        <table>
+          <tr><th>锁价单号</th><td>{{ lockId }}</td></tr>
+          <tr><th>锁定价</th><td>{{ lockedPrice }} 元/吨</td></tr>
+          <tr><th>保证金</th><td>¥ {{ margin }}</td></tr>
+          <tr><th>到期时间</th><td>{{ expires }}</td></tr>
+          <tr><th>状态</th><td><span class="badge blue">{{ status }}</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return { nav: NavBar("pricelock.html"), merchant: Session.merchant || "101",
+                 price: 3820, qty: 200, duration: 6, volatility: 0.0,
+                 durations: [2,6,24], trend: [22,28,20,34,26,40,30,18,24,16],
+                 lockId: null, lockedPrice: null, margin: null, expires: null,
+                 status: "", msg: "", err: "" };
+      },
+      methods: {
+        async lock() {
+          this.err = ""; this.msg = "";
+          try {
+            const r = await api("/pricelock", { method: "POST", body: {
+              buyer_enterprise_id: 11, listing_id: 2001, price: this.price,
+              quantity: this.qty, duration_hours: this.duration, volatility: this.volatility } });
+            this.lockId = r.lock_id; this.lockedPrice = r.locked_price;
+            this.margin = r.margin; this.expires = r.expires_at; this.status = "active";
+            this.msg = "锁价成功，可在有效期内下单。";
+          } catch (e) { this.err = "锁价失败：" + (e.detail || e.status); }
+        },
+        async exercise() {
+          this.err = ""; this.msg = "";
+          try {
+            const r = await api("/pricelock/" + this.lockId + "/exercise", { method: "POST" });
+            this.status = r.status; this.msg = "已在锁价内成交（exercised）。";
+          } catch (e) { this.err = "行权失败：" + (e.detail || e.status); }
+        },
+      },
+    }).mount("#app");
+  </script>
+</body>
+</html>
