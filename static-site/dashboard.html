@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>客户主权看板 · 货袋子现货平台</title>
+<link rel="stylesheet" href="site.css" />
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">货袋子现货平台<small>智能获客 · 运营 · 转化</small></div>
+    <nav class="nav">
+      <a href="index.html"><span class="ico">📊</span>经营总览</a>
+      <a class="active" href="dashboard.html"><span class="ico">🛡️</span>客户主权看板</a>
+      <a href="acquisition.html"><span class="ico">🎯</span>智能获客</a>
+      <a href="operation.html"><span class="ico">🔄</span>智能客户运营</a>
+      <a href="conversion.html"><span class="ico">💰</span>智能转化与风控</a>
+    </nav>
+    <div class="side-foot">防撬客铁律<br/>引擎层 · 网关层 · 鉴权层三重保证</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>客户主权看板</h1>
+        <div class="sub">你的老客户永远是你的 — 平台只帮你从公海捞新客户</div>
+      </div>
+      <div class="idbox">当前身份：<b>甲贸易 · 商家101</b></div>
+    </div>
+
+    <div class="cards">
+      <div class="stat blue"><div class="label">私域客户数</div><div class="value">1,248</div></div>
+      <div class="stat"><div class="label">战略客户（永不入公海）</div><div class="value">36</div></div>
+      <div class="stat"><div class="label">本月被同行尝试访问</div><div class="value">17</div>
+        <div class="delta">全部已拦截</div></div>
+      <div class="stat good"><div class="label">客户主权投诉</div><div class="value">0</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>我的客户</h2>
+      <p class="desc">私域客户仅你可见；战略客户强制 private、永不被撮合、联系方式托管。</p>
+      <table>
+        <tr><th>客户</th><th>类型</th><th>归属</th><th>保护状态</th><th>可见性</th><th>操作</th></tr>
+        <tr class="hot">
+          <td>高价值终端 C1 · 河北顺达建材 <span class="muted">#11</span></td>
+          <td>终端</td><td>成交(dealt)</td>
+          <td><span class="badge blue">战略锁定</span></td>
+          <td><span class="lock">🔒 private · 联系方式托管</span></td>
+          <td><span class="muted">永不入公海</span></td>
+        </tr>
+        <tr>
+          <td>唐山宏发贸易 <span class="muted">#23</span></td><td>贸易</td><td>成交(dealt)</td>
+          <td><span class="badge green">保护期内 · 剩 64 天</span></td><td>private</td>
+          <td><button class="btn ghost sm">设为战略客户</button></td>
+        </tr>
+        <tr>
+          <td>邯郸金鼎门店 <span class="muted">#41</span></td><td>门零</td><td>询价(inquired)</td>
+          <td><span class="badge green">保护期内 · 剩 38 天</span></td><td>private</td>
+          <td><button class="btn ghost sm">设为战略客户</button></td>
+        </tr>
+        <tr>
+          <td>保定建工集采 <span class="muted">#55</span></td><td>终端</td><td>导入(imported)</td>
+          <td><span class="badge amber">即将掉保 · 剩 5 天</span></td><td>private</td>
+          <td><button class="btn primary sm">立即跟进续期</button></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="split">
+      <div class="panel">
+        <h2>客户访问审计 · “我的客户被谁访问过”</h2>
+        <p class="desc">信任来自可验证。竞争对手对你私域/战略客户的访问会被拦截并留痕。</p>
+        <table>
+          <tr><th>访问方</th><th>目标客户</th><th>动作</th><th>结果</th><th>原因</th></tr>
+          <tr class="denied"><td>乙批发 · 商家102</td><td>C1 #11</td><td>view</td>
+            <td><span class="tag-deny">拒绝</span></td><td class="muted">owned_by_other（战略客户）</td></tr>
+          <tr class="denied"><td>丙钢贸 · 商家108</td><td>C1 #11</td><td>contact</td>
+            <td><span class="tag-deny">拒绝</span></td><td class="muted">owned_by_other</td></tr>
+          <tr><td>甲贸易 · 商家101（我）</td><td>C1 #11</td><td>view</td>
+            <td><span class="tag-allow">允许</span></td><td class="muted">owner</td></tr>
+          <tr class="denied"><td>乙批发 · 商家102</td><td>唐山宏发 #23</td><td>distribute</td>
+            <td><span class="tag-deny">拒绝</span></td><td class="muted">owned_by_other</td></tr>
+        </table>
+        <div class="hint" style="margin-top:14px;">🛡️ 智能撮合只作用于公域无主流量；你的私域客户绝不进入分发池。</div>
+      </div>
+
+      <div class="panel">
+        <h2>战略客户保护 · C1 河北顺达建材</h2>
+        <p class="desc">高价值客户“保险柜”：多重锁死，可审计。</p>
+        <div style="margin-top:6px;">
+          <div class="todo" style="border-left-color:var(--green)">
+            <div class="row" style="justify-content:space-between"><b>仅我可见</b><span class="badge green">已开启</span></div>
+            <div class="why">其他商家在任何功能里都查询不到该客户。</div>
+          </div>
+          <div class="todo" style="border-left-color:var(--green)">
+            <div class="row" style="justify-content:space-between"><b>永不入公海</b><span class="badge green">已开启</span></div>
+            <div class="why">规则引擎跳过一切掉保逻辑，永久绑定。</div>
+          </div>
+          <div class="todo" style="border-left-color:var(--green)">
+            <div class="row" style="justify-content:space-between"><b>联系方式托管</b><span class="badge green">已开启</span></div>
+            <div class="why">沟通走虚拟号/站内 IM，真实号码加密保管。</div>
+          </div>
+          <div class="todo" style="border-left-color:var(--primary)">
+            <div class="row" style="justify-content:space-between"><b>战略客户全局互斥</b><span class="badge blue">已生效</span></div>
+            <div class="why">同一客户只能被一家设为战略，先到先得 + 客户可申诉。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">说明：静态演示数据为示意。对应引擎：ownership.py / gateway.py；接口：/my/customers、/audit、/relations/strategic。</p>
+  </main>
+</div>
+</body>
+</html>
